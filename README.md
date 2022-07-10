@@ -1,2 +1,1 @@
-# DevopsLearnings
-My Devops Repository
+Automating AWS with Terraform
