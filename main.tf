@@ -15,13 +15,12 @@ provider "aws" {
 # Create a VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = var.env_code
+  }
 }
 
-#Local variables
-locals {
-  public_cidr  = ["10.0.0.0/24", "10.0.1.0/24"]
-  private_cidr = ["10.0.2.0/24", "10.0.3.0/24"]
-}
 
 #2 Public Subnet 
 
@@ -29,10 +28,10 @@ resource "aws_subnet" "public" {
   count = 2
 
   vpc_id     = aws_vpc.main.id
-  cidr_block = local.public_cidr[count.index]
+  cidr_block = var.public_cidr[count.index]
 
   tags = {
-    Name = "public${count.index}"
+    Name = "${var.env_code}-public${count.index}"
   }
 }
 
@@ -42,10 +41,10 @@ resource "aws_subnet" "private" {
   count = 2
 
   vpc_id     = aws_vpc.main.id
-  cidr_block = local.private_cidr[count.index]
+  cidr_block = var.private_cidr[count.index]
 
   tags = {
-    Name = "private${count.index}"
+    Name = "${var.env_code}-private${count.index}"
   }
 }
 
@@ -54,7 +53,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "main"
+    Name = var.env_code
   }
 }
 
@@ -63,7 +62,12 @@ resource "aws_eip" "nat" {
   count = 2
 
   vpc = true
+  tags = {
+    Name = "${var.env_code}-nat${count.index}"
+  }
+
 }
+
 
 #2 NAts attached to Public Subnet
 resource "aws_nat_gateway" "main" {
@@ -72,7 +76,7 @@ resource "aws_nat_gateway" "main" {
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name = "main"
+    Name = "${var.env_code}-${count.index}"
   }
 }
 
@@ -86,7 +90,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "public"
+    Name = "${var.env_code}-public"
   }
 }
 
@@ -102,7 +106,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "private${count.index}"
+    Name = "${var.env_code}-private${count.index}"
   }
 }
 
@@ -172,19 +176,4 @@ resource "aws_security_group" "Private_SG" {
   tags = {
     Name = "Private_SG"
   }
-}
-
-resource "aws_key_pair" "TF" {
-  key_name   = "TF_KEY"
-  public_key = tls_private_key.rsa.public_key_openssh
-}
-
-resource "tls_private_key" "rsa" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "local_file" "TF" {
-  content  = tls_private_key.rsa.private_key_pem
-  filename = "TF_KEY"
 }
