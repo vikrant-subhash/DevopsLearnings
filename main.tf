@@ -15,36 +15,37 @@ provider "aws" {
 # Create a VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name = var.env_code
-  }
 }
 
+#Local variables
+locals {
+  public_cidr  = ["10.0.0.0/24", "10.0.1.0/24"]
+  private_cidr = ["10.0.2.0/24", "10.0.3.0/24"]
+}
 
 #2 Public Subnet 
 
 resource "aws_subnet" "public" {
-  count = length(var.public_cidr)
+  count = 2
 
   vpc_id     = aws_vpc.main.id
-  cidr_block = var.public_cidr[count.index]
+  cidr_block = local.public_cidr[count.index]
 
   tags = {
-    Name = "${var.env_code}-public${count.index}"
+    Name = "public${count.index}"
   }
 }
 
 #2 Private Subnet
 
 resource "aws_subnet" "private" {
-  count = length(var.private_cidr)
+  count = 2
 
   vpc_id     = aws_vpc.main.id
-  cidr_block = var.private_cidr[count.index]
+  cidr_block = local.private_cidr[count.index]
 
   tags = {
-    Name = "${var.env_code}-private${count.index}"
+    Name = "private${count.index}"
   }
 }
 
@@ -53,30 +54,25 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = var.env_code
+    Name = "main"
   }
 }
 
 #2 elastic Ips for 2 Nats
 resource "aws_eip" "nat" {
-  count = length(var.private_cidr)
+  count = 2
 
   vpc = true
-  tags = {
-    Name = "${var.env_code}-nat${count.index}"
-  }
-
 }
-
 
 #2 NAts attached to Public Subnet
 resource "aws_nat_gateway" "main" {
-  count         = length(var.public_cidr)
+  count         = 2
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = aws_subnet.public[count.index].id
 
   tags = {
-    Name = "${var.env_code}-${count.index}"
+    Name = "main"
   }
 }
 
@@ -90,14 +86,14 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name = "${var.env_code}-public"
+    Name = "public"
   }
 }
 
 #2 route tables for 2 nats
 resource "aws_route_table" "private" {
 
-  count  = length(var.private_cidr)
+  count  = 2
   vpc_id = aws_vpc.main.id
 
   route {
@@ -106,20 +102,20 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name = "${var.env_code}-private${count.index}"
+    Name = "private${count.index}"
   }
 }
 
 #2 route association tables for Public Subnet and Internet gateway
 resource "aws_route_table_association" "public" {
-  count          = length(var.public_cidr)
+  count          = 2
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
 #2 route asspciation tables between 2 Nat and 2 Private subnet
 resource "aws_route_table_association" "private" {
-  count          = length(var.private_cidr)
+  count          = 2
   subnet_id      = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private[count.index].id
 }
@@ -176,4 +172,19 @@ resource "aws_security_group" "Private_SG" {
   tags = {
     Name = "Private_SG"
   }
+}
+
+resource "aws_key_pair" "TF" {
+  key_name   = "TF_KEY"
+  public_key = tls_private_key.rsa.public_key_openssh
+}
+
+resource "tls_private_key" "rsa" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "local_file" "TF" {
+  content  = tls_private_key.rsa.private_key_pem
+  filename = "TF_KEY"
 }
