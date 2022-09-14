@@ -14,8 +14,8 @@ resource "aws_instance" "public" {
 
 # Public Security groups
 resource "aws_security_group" "Public_SG" {
-  name        = "TF_PubSG"
-  description = "TF_PubSG"
+  name        = "${var.env_code}-public"
+  description = "${var.env_code}-public"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -35,7 +35,7 @@ resource "aws_security_group" "Public_SG" {
   }
 
   tags = {
-    Name = "Public_SG"
+    Name = "${var.env_code}-public"
   }
 }
 
@@ -55,8 +55,8 @@ resource "aws_instance" "private" {
 
 #Private Secuity groups
 resource "aws_security_group" "Private_SG" {
-  name        = "TF_PvtSG"
-  description = "TF_PvtSG"
+  name        = "${var.env_code}-private"
+  description = "${var.env_code}-private"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -76,6 +76,6 @@ resource "aws_security_group" "Private_SG" {
   }
 
   tags = {
-    Name = "Private_SG"
+    Name = "${var.env_code}-private"
   }
 }
