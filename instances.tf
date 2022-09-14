@@ -9,7 +9,6 @@ resource "aws_instance" "public" {
   tags = {
     Name = "${var.env_code}-public"
   }
-
 }
 
 resource "aws_security_group" "public" {
@@ -48,7 +47,6 @@ resource "aws_instance" "private" {
   tags = {
     Name = "${var.env_code}-private"
   }
-
 }
 
 resource "aws_security_group" "private" {
