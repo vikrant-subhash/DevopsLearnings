@@ -3,7 +3,7 @@ resource "aws_instance" "public" {
   associate_public_ip_address = true
   instance_type               = "t2.micro"
   key_name                    = "terraform_key_pair"
-  vpc_security_group_ids      = [aws_security_group.Public_SG.id]
+  vpc_security_group_ids      = [aws_security_group.public.id]
   subnet_id                   = aws_subnet.public[1].id
 
   tags = {
@@ -43,7 +43,7 @@ resource "aws_instance" "private" {
   ami                    = "ami-06489866022e12a14"
   instance_type          = "t3.micro"
   key_name               = "main"
-  vpc_security_group_ids = [aws_security_group.Private_SG.id]
+  vpc_security_group_ids = [aws_security_group.public.id]
   subnet_id              = aws_subnet.private[0].id
 
   tags = {
