@@ -4,3 +4,4 @@ terraform.tfstate.backup
 Firstlaunchtesjuly.pem
 TF_KEY.pem
 .terraform/
+.terraform.lock.hcl

@@ -9,11 +9,11 @@ resource "aws_instance" "public" {
   tags = {
     Name = "${var.env_code}-public"
   }
+  
+  }
 
-}
 
-# Public Security groups
-resource "aws_security_group" "Public_SG" {
+resource "aws_security_group" "public" {
   name        = "${var.env_code}-public"
   description = "${var.env_code}-public"
   vpc_id      = aws_vpc.main.id
@@ -42,7 +42,7 @@ resource "aws_security_group" "Public_SG" {
 resource "aws_instance" "private" {
   ami                    = "ami-06489866022e12a14"
   instance_type          = "t3.micro"
-  key_name               = "terraform_key_pair"
+  key_name               = "main"
   vpc_security_group_ids = [aws_security_group.Private_SG.id]
   subnet_id              = aws_subnet.private[0].id
 
@@ -53,8 +53,8 @@ resource "aws_instance" "private" {
 }
 
 
-#Private Secuity groups
-resource "aws_security_group" "Private_SG" {
+
+resource "aws_security_group" "private" {
   name        = "${var.env_code}-private"
   description = "${var.env_code}-private"
   vpc_id      = aws_vpc.main.id
