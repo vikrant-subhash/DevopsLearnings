@@ -5,3 +5,4 @@ Firstlaunchtesjuly.pem
 TF_KEY.pem
 .terraform/
 .terraform.lock.hcl
+main.pem
