@@ -22,6 +22,8 @@ resource "aws_instance" "public" {
   vpc_security_group_ids      = [aws_security_group.public.id]
   subnet_id                   = aws_subnet.public[1].id
 
+  user_data = file("user_data.sh") # it is used so that instance can be startup with configuration mentioned in the script
+
   tags = {
     Name = "${var.env_code}-public"
   }
@@ -36,6 +38,14 @@ resource "aws_security_group" "public" {
     description = "SSH from VPC"
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress { #Added http port to enable tomcat to access through url using port public address on port 80
+    description = "Http from VPC"
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
