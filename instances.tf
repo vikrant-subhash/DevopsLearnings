@@ -1,8 +1,24 @@
+data "aws_ami" "amazonlinux" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-kernel-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["137112412989"] #This owner account id is of amazon which is used to distribute public AMI's
+}
+
 resource "aws_instance" "public" {
-  ami                         = "ami-06489866022e12a14"
+  ami                         = data.aws_ami.amazonlinux.id
   associate_public_ip_address = true
-  instance_type               = "t2.micro"
-  key_name                    = "terraform_key_pair"
+  instance_type               = "t3.micro"
+  key_name                    = "main"
   vpc_security_group_ids      = [aws_security_group.public.id]
   subnet_id                   = aws_subnet.public[1].id
 
@@ -38,7 +54,7 @@ resource "aws_security_group" "public" {
 }
 
 resource "aws_instance" "private" {
-  ami                    = "ami-06489866022e12a14"
+  ami                    = data.aws_ami.amazonlinux.id
   instance_type          = "t3.micro"
   key_name               = "main"
   vpc_security_group_ids = [aws_security_group.public.id]
