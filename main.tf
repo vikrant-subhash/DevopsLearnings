@@ -1,17 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-}
-
-# Configure the AWS Provider
-provider "aws" {
-  region = "ap-south-1"
-}
-
 # Create a VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -20,9 +6,6 @@ resource "aws_vpc" "main" {
     Name = var.env_code
   }
 }
-
-
-#2 Public Subnet 
 
 resource "aws_subnet" "public" {
   count = length(var.public_cidr)
@@ -35,8 +18,6 @@ resource "aws_subnet" "public" {
   }
 }
 
-#2 Private Subnet
-
 resource "aws_subnet" "private" {
   count = length(var.private_cidr)
 
@@ -48,7 +29,6 @@ resource "aws_subnet" "private" {
   }
 }
 
-#One Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
@@ -67,7 +47,6 @@ resource "aws_eip" "nat" {
   }
 
 }
-
 
 #2 NAts attached to Public Subnet
 resource "aws_nat_gateway" "main" {
