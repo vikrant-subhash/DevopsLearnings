@@ -7,4 +7,3 @@ data "terraform_remote_state" "level1" {
     region = "ap-south-1"
   }
 }
-  
